@@ -7,21 +7,15 @@ Platforms: Baekjoon, Programmers
 ```text
 coding-test/
  ├─ java/
- │   ├─ baekjoon/
- │   │   ├─ bronze/
- │   │   ├─ silver/
- │   │   └─ gold/
- │   └─ programmers/
- │       ├─ level1/
- │       └─ level2/
+ │   └─ src/
+ │       ├─ bj/
+ │       └─ pg/
  ├─ kotlin/
- │   └─ baekjoon/
  └─ c/
-     └─ baekjoon/
 ```
 
 ## Naming Rule
-- Folder : {problemNumber}_{problemName}
+- Folder : p{problemNumber}
 - File : Main.java, Main.kt, main.c
 - Each problem folder includes:
     - Source Code
