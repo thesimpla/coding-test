@@ -4,7 +4,7 @@ This repository contains my coding test solutions in Java, Kotlin, C
 Platforms: Baekjoon, Programmers
 
 ## Directory Structure
-'''text
+```text
 coding-test/
  ├─ java/
  │   ├─ baekjoon/
@@ -18,7 +18,7 @@ coding-test/
  │   └─ baekjoon/
  └─ c/
      └─ baekjoon/
-'''
+```
 
 ## Naming Rule
 - Folder : {problemNumber}_{problemName}
