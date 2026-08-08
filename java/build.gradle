@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'checkstyle'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// bj/ 문제들은 패키지 없이 전부 Main 클래스라 하나의 sourceSet으로 컴파일하면 충돌한다.
+// pg/ 문제 풀이만 포맷/린트 대상으로 삼는다.
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/pg']
+        }
+    }
+}
+
+spotless {
+    java {
+        target 'src/pg/**/*.java'
+        // aosp() = 4-space indent, 기존 저장소 코드 스타일과 맞춘다 (기본 googleJavaFormat은 2-space).
+        googleJavaFormat().aosp()
+    }
+}
+
+checkstyle {
+    toolVersion = '10.18.2'
+    configFile = file('config/checkstyle/checkstyle.xml')
+    maxWarnings = 0
+}
