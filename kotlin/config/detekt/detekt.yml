@@ -1,0 +1,43 @@
+# 코딩테스트(pg) 풀이용 클린 코드 체크리스트.
+# buildUponDefaultConfig=true 라서 여기 안 적은 규칙은 detekt 기본값을 그대로 따른다.
+# 여기서는 코딩테스트 코드에는 과한 규칙(KDoc 강제 등)만 끄고, 관심 있는 항목만 값을 조정한다.
+
+comments:
+  active: false # KDoc/주석 형식 강제는 코딩테스트에는 과함
+
+naming:
+  VariableNaming:
+    active: true
+  FunctionNaming:
+    active: true
+  ClassNaming:
+    active: true
+  # 프로그래머스 컨벤션상 클래스는 항상 Solution, 메서드도 항상 solution이라 이름이 겹치는 게 정상.
+  MemberNameEqualsClassName:
+    active: false
+  # p{문제번호}_{슬러그} 형식의 패키지명(숫자/언더스코어 포함)을 쓰기로 했으므로 표준 규칙을 끈다.
+  PackageNaming:
+    active: false
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers: ['-1', '0', '1', '2']
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  WildcardImport:
+    active: true
+
+complexity:
+  LongMethod:
+    active: true
+    threshold: 40
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: true
+  EmptyCatchBlock:
+    active: true
+  EmptyIfBlock:
+    active: true
