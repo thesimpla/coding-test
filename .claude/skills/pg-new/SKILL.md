@@ -1,6 +1,6 @@
 ---
 name: pg-new
-description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/pg 아래에 레벨별 패키지, README.md, Solution 스켈레톤을 생성한다. "/pg-new <url> <level> [java|kotlin]" 형태로 호출.
+description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/pg 아래에 레벨별 패키지, README.md, Solution 스켈레톤을 생성한다. "/pg-new <url> <level> [java|kotlin]" 형태로 호출 (기본값 kotlin).
 ---
 
 # pg-new
@@ -13,7 +13,7 @@ description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/p
 
 - `<programmers-url>`: 예) `https://school.programmers.co.kr/learn/courses/30/lessons/12977`
 - `<level>`: 정수 (1, 2, 3, ...). **레벨 뱃지는 문제 페이지가 SPA라 정적으로 긁을 수 없으므로 반드시 사용자가 직접 입력한다.** 둘 중 하나라도 빠지면 실행하지 말고 사용자에게 물어본다.
-- `[language]`: `java`(기본값) 또는 `kotlin`. 생략하면 java.
+- `[language]`: `java` 또는 `kotlin`(기본값). 생략하면 kotlin.
 
 ## 절차
 
