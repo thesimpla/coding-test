@@ -37,3 +37,12 @@ checkstyle {
 tasks.withType(Checkstyle).configureEach {
     exclude '**/SolutionTest.java'
 }
+
+// 특정 문제의 main()을 터미널에서 실행한다.
+// 예) ./gradlew runMain -PmainClass=pg.level1.p12977_make_prime.SolutionTest
+tasks.register('runMain', JavaExec) {
+    group = 'application'
+    description = 'Runs a main() by fully qualified class name (-PmainClass=...)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = providers.gradleProperty('mainClass')
+}

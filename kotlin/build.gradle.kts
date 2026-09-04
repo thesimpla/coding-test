@@ -46,3 +46,12 @@ detekt {
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     exclude("**/SolutionTest.kt")
 }
+
+// 특정 문제의 main()을 터미널에서 실행한다.
+// 예) ./gradlew runMain -PmainClass=pg.level1.p42627_disk_controller.SolutionTestKt
+tasks.register<JavaExec>("runMain") {
+    group = "application"
+    description = "Runs a main() by fully qualified class name (-PmainClass=...)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set(providers.gradleProperty("mainClass"))
+}
