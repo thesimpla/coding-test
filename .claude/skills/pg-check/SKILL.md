@@ -5,7 +5,7 @@ description: java/src/pg 또는 kotlin/src/pg 아래 프로그래머스 풀이 �
 
 # pg-check
 
-`/pg-new`로 만든 패키지에 실제 풀이 코드를 다 작성한 뒤, 포맷 정리 → 정적 린트 → AI 클린 코드 리뷰까지 한 번에 돌린다. java, kotlin 둘 다 지원한다.
+`/pg-create`로 만든 패키지에 실제 풀이 코드를 다 작성한 뒤, 포맷 정리 → 정적 린트 → AI 클린 코드 리뷰까지 한 번에 돌린다. java, kotlin 둘 다 지원한다.
 
 ## 입력
 
