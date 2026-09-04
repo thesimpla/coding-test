@@ -14,6 +14,7 @@ description: java/src/pg 또는 kotlin/src/pg 아래 프로그래머스 풀이 �
 - 폴더 경로를 생략하면, `java/src/pg`와 `kotlin/src/pg` 전체를 통틀어 가장 최근에 수정된 `Solution.java`/`Solution.kt`가 속한 폴더를 대상으로 한다.
 - 경로를 준 경우 해당 폴더 안의 `Solution.java` 또는 `Solution.kt`를 대상으로 한다.
 - 경로가 `java/...` 아래면 java 파이프라인을, `kotlin/...` 아래면 kotlin 파이프라인을 쓴다.
+- 같은 폴더의 `SolutionTest.kt`/`SolutionTest.java`는 입출력 예를 박아둔 로컬 확인용 파일이라 Checkstyle/detekt 대상에서 이미 제외돼 있다. AI 리뷰에서도 리뷰 대상이 아니다 (포맷팅만 적용됨).
 
 ## 절차
 

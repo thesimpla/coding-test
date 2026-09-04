@@ -40,3 +40,9 @@ detekt {
     config.setFrom(file("config/detekt/detekt.yml"))
     source.setFrom(files("src/pg"))
 }
+
+// SolutionTest는 입출력 예를 그대로 박아둔 로컬 확인용 파일이라 매직넘버 등이 잔뜩 잡힌다.
+// 린트 대상은 실제 제출하는 Solution 코드로 한정한다.
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    exclude("**/SolutionTest.kt")
+}

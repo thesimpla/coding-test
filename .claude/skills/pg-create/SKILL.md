@@ -1,6 +1,6 @@
 ---
 name: pg-create
-description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/pg 아래에 레벨별 패키지, README.md, Solution 스켈레톤을 생성한다. "/pg-create <url> <level> [java|kotlin]" 형태로 호출 (기본값 kotlin).
+description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/pg 아래에 레벨별 패키지, README.md, Solution 스켈레톤, 입출력 예 기반 SolutionTest를 생성한다. "/pg-create <url> <level> [java|kotlin]" 형태로 호출 (기본값 kotlin).
 ---
 
 # pg-create
@@ -23,8 +23,10 @@ description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/p
    - 한글 문제 제목
    - 제한사항 요약
    - 함수 시그니처 (언어는 보통 C/C++로 표시됨, 예: `int solution(int nums[], size_t nums_len)`)
+   - **입출력 예 테이블 전체** (파라미터별 입력값과 return 값). 테스트 케이스 생성에 쓰므로 값을 임의로 바꾸거나 요약하지 말고 그대로 가져온다.
 
    WebFetch는 이 URL에 대해 위 정보를 안정적으로 추출한다는 게 확인되어 있다 (레벨 정보만 못 가져온다).
+   입출력 예가 한 번에 안 나오면 "입출력 예 테이블을 그대로 추출해줘"로 프롬프트를 바꿔 한 번 더 호출한다.
 
 3. **슬러그 생성**: 한글 제목을 요약하는 영문 snake_case 슬러그를 2~4단어로 만든다.
    - 참고 예시(기존 컨벤션): "소수 만들기" → `make_prime`
@@ -81,7 +83,48 @@ description: 프로그래머스 문제 링크로 java/src/pg 또는 kotlin/src/p
 
    - 본문은 반환 타입에 맞는 최소 기본값만 반환하는 빈 스켈레톤으로 둔다 (예: `Int`/`int` → `0`, `Boolean`/`boolean` → `false`, `String` → `""`). 실제 풀이 로직은 채우지 않는다.
 
-7. **보고**: 생성한 경로와 파일 목록을 사용자에게 알려주고, 레벨은 사용자가 직접 입력한 값이라 자동 검증되지 않았다는 점을 한 줄로 짚어준다. 이어서 다 풀고 나면 `/pg-check`로 포맷/린트/리뷰를 돌릴 수 있다고 안내한다.
+7. **테스트 케이스 파일 생성**: 같은 폴더에 `SolutionTest.kt` / `SolutionTest.java`를 만들어, 2번에서 가져온 **입출력 예를 전부** 실행해보고 기대값과 비교해 출력하게 한다.
+   - 새 의존성(JUnit 등)을 추가하지 않는다. 그냥 `main()`에서 돌려보고 결과를 출력하는 방식 — IntelliJ에서 `main` 옆 초록색 ▶로 바로 실행할 수 있다.
+   - 실제값이 기대값과 같으면 `PASS`, 다르면 `FAIL`로 표시하고 둘 다 찍어준다.
+   - 배열 반환 문제는 `contentEquals`(kotlin) / `Arrays.equals`(java)로 비교하고, 출력도 `contentToString`/`Arrays.toString`을 쓴다.
+
+   **kotlin** — `SolutionTest.kt`:
+   ```kotlin
+   package pg.level{level}.p{id}_{slug}
+
+   fun main() {
+       val solution = Solution()
+
+       // 입출력 예 #1
+       val jobs1 = arrayOf(intArrayOf(0, 3), intArrayOf(1, 9), intArrayOf(3, 5))
+       val expected1 = 8
+       val actual1 = solution.solution(jobs1)
+       println("#1 expected=$expected1 actual=$actual1 ${if (actual1 == expected1) "PASS" else "FAIL"}")
+   }
+   ```
+
+   **java** — `SolutionTest.java`:
+   ```java
+   package pg.level{level}.p{id}_{slug};
+
+   public class SolutionTest {
+       public static void main(String[] args) {
+           Solution solution = new Solution();
+
+           // 입출력 예 #1
+           int[][] jobs1 = {{0, 3}, {1, 9}, {3, 5}};
+           int expected1 = 8;
+           int actual1 = solution.solution(jobs1);
+           System.out.println("#1 expected=" + expected1 + " actual=" + actual1
+                   + (actual1 == expected1 ? " PASS" : " FAIL"));
+       }
+   }
+   ```
+
+   - 입출력 예가 여러 개면 번호를 붙여 전부 넣는다 (`#1`, `#2`, ...).
+   - 이 파일은 **로컬 확인용**이고 프로그래머스에 제출하는 건 `Solution` 쪽이라는 걸 사용자에게 알려준다.
+
+8. **보고**: 생성한 경로와 파일 목록을 사용자에게 알려주고, 레벨은 사용자가 직접 입력한 값이라 자동 검증되지 않았다는 점을 한 줄로 짚어준다. 이어서 다 풀고 나면 `/pg-check`로 포맷/린트/리뷰를 돌릴 수 있다고 안내한다.
 
 ## 하지 않는 것
 
