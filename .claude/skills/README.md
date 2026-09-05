@@ -18,8 +18,8 @@
 | | pg-test | pg-tc-kotlin / pg-tc-java |
 |---|---|---|
 | 범위 | 기존 `SolutionTest`에 케이스 몇 개 **추가** | 문제를 처음부터 분석해 테스트 **전체 설계** |
-| 산출물 | 테스트 케이스 | 분석 리포트 + 전체 테스트 코드 + brute-force oracle + 랜덤 반례 탐색 + 복잡도 분석 |
-| 비용 | 가벼움 | 무거움 (Opus + high effort 권장) |
+| 산출물 | 테스트 케이스 | 전체 테스트 코드 + brute-force oracle + 랜덤 반례 탐색 (분석 근거는 내부에 보관, 응답엔 파일경로+PASS/FAIL 요약만. 왜 그런지는 물어보면 답함) |
+| 비용 | 가벼움 | 무거움 (Sonnet 5 + effort 높음 권장) |
 | 쓸 때 | "이 증상 원인만 빨리 좁히자" | "이 문제 제대로 털어보자" |
 
 ### 전형적인 흐름
@@ -43,7 +43,7 @@
 | `pg-create` | Sonnet, 기본 effort | 링크 읽고 템플릿 채우는 기계적 작업. 판단이 필요한 부분은 슬러그 작명 정도 |
 | `pg-check` | Sonnet 기본 (리뷰 깊게 원하면 Opus) | 포맷·린트는 Gradle이 하고, AI가 추론하는 건 마지막 리뷰 단계뿐 |
 | `pg-test` | **Opus + high effort** | 제약조건 해석 + 현재 풀이의 약점 분석 + 기대값 직접 계산까지, 추론 부담이 가장 큼. 기대값을 틀리게 만들면 없는 버그를 쫓게 되므로 손해가 큰 지점 |
-| `pg-tc-kotlin` / `pg-tc-java` | **Opus + high effort (필수에 가까움)** | 문제 분석 + 유형 판단 + 구현 취약점 추론 + expected 직접 계산 + brute-force oracle 작성까지 한 번에. oracle이 틀리면 랜덤 테스트 전체가 거짓 신호가 되므로 정확도가 가장 중요한 스킬 |
+| `pg-tc-kotlin` / `pg-tc-java` | **Sonnet 5 + effort 높음** | 문제 분석 + 유형 판단 + 구현 취약점 추론 + expected 직접 계산 + brute-force oracle 작성까지 한 번에 한다. oracle이 틀리면 랜덤 테스트 전체가 거짓 신호가 되므로, 모델보다 **effort를 높게** 두는 게 중요 |
 
 모델 변경은 `/model`로 한다 (예: `/model claude-opus-5`).
 
