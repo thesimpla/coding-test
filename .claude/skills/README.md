@@ -8,8 +8,19 @@
 | 스킬 | 언제 쓰나 | 호출 |
 |---|---|---|
 | [pg-create](pg-create/SKILL.md) | 문제 풀기 **시작할 때** | `/pg-create <url> <level> [java\|kotlin]` |
-| [pg-test](pg-test/SKILL.md) | 제출했는데 **일부 실패/시간초과** 났을 때 | `/pg-test [폴더경로] [증상]` |
+| [pg-test](pg-test/SKILL.md) | 제출했는데 **일부 실패/시간초과** 났을 때 (가볍게) | `/pg-test [폴더경로] [증상]` |
+| [pg-tc-kotlin](pg-tc-kotlin/SKILL.md) | 문제를 **본격적으로 분석**해서 테스트 설계 (Kotlin) | `/pg-tc-kotlin <url> [풀이경로]` |
+| [pg-tc-java](pg-tc-java/SKILL.md) | 같은 목적의 Java판 | `/pg-tc-java <url> [풀이경로]` |
 | [pg-check](pg-check/SKILL.md) | 다 풀고 **마무리**할 때 | `/pg-check [폴더경로]` |
+
+### pg-test vs pg-tc-*
+
+| | pg-test | pg-tc-kotlin / pg-tc-java |
+|---|---|---|
+| 범위 | 기존 `SolutionTest`에 케이스 몇 개 **추가** | 문제를 처음부터 분석해 테스트 **전체 설계** |
+| 산출물 | 테스트 케이스 | 분석 리포트 + 전체 테스트 코드 + brute-force oracle + 랜덤 반례 탐색 + 복잡도 분석 |
+| 비용 | 가벼움 | 무거움 (Opus + high effort 권장) |
+| 쓸 때 | "이 증상 원인만 빨리 좁히자" | "이 문제 제대로 털어보자" |
 
 ### 전형적인 흐름
 
@@ -32,6 +43,7 @@
 | `pg-create` | Sonnet, 기본 effort | 링크 읽고 템플릿 채우는 기계적 작업. 판단이 필요한 부분은 슬러그 작명 정도 |
 | `pg-check` | Sonnet 기본 (리뷰 깊게 원하면 Opus) | 포맷·린트는 Gradle이 하고, AI가 추론하는 건 마지막 리뷰 단계뿐 |
 | `pg-test` | **Opus + high effort** | 제약조건 해석 + 현재 풀이의 약점 분석 + 기대값 직접 계산까지, 추론 부담이 가장 큼. 기대값을 틀리게 만들면 없는 버그를 쫓게 되므로 손해가 큰 지점 |
+| `pg-tc-kotlin` / `pg-tc-java` | **Opus + high effort (필수에 가까움)** | 문제 분석 + 유형 판단 + 구현 취약점 추론 + expected 직접 계산 + brute-force oracle 작성까지 한 번에. oracle이 틀리면 랜덤 테스트 전체가 거짓 신호가 되므로 정확도가 가장 중요한 스킬 |
 
 모델 변경은 `/model`로 한다 (예: `/model claude-opus-5`).
 
