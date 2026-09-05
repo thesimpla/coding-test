@@ -30,6 +30,11 @@ spotless {
                 "ktlint_standard_property-naming" to "disabled",
                 "ktlint_standard_function-naming" to "disabled",
                 "ktlint_standard_class-naming" to "disabled",
+                // 주석 위치 규칙도 자동수정이 안 돼서 빌드를 죽인다.
+                // 풀이 코드에 설명 주석을 자유롭게 다는 게 더 중요하므로 끈다.
+                "ktlint_standard_value-argument-comment" to "disabled",
+                "ktlint_standard_value-parameter-comment" to "disabled",
+                "ktlint_standard_discouraged-comment-location" to "disabled",
             )
         )
     }

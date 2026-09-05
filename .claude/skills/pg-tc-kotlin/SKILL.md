@@ -157,6 +157,8 @@ brute-force 자체의 정답성을 확신할 수 없다면 **억지로 만들지
 
 입력 공간이 작으면(불리언 조합, 길이 1~8 배열, 작은 문자 집합, 작은 그래프·순열) **랜덤보다 완전열거가 강력하다.** 그 경우 완전열거를 우선 제안한다.
 
+**중요**: 완전열거/랜덤 탐색 함수 전체를 11단계의 `callWithTimeout`으로 감싸서 부른다 (개별 호출이 아니라 함수 전체를 한 번에). 그리고 7단계에서 이미 타임아웃(무한루프 의심)이 하나라도 났다면 **이 단계 자체를 건너뛴다** — 무한루프가 있는 채로 수천 회 반복 탐색을 돌리면 좀비 스레드가 쌓여 메모리를 압박한다. 실제로 이 순서를 안 지켜서 Gradle 데몬이 힙 부족으로 죽은 적이 있다.
+
 ### 9단계 — 상태 오염 / 입력 mutation 검증
 
 - 각 테스트는 **독립된 입력 객체**를 쓴다 (재사용 금지).
@@ -185,40 +187,67 @@ brute-force 자체의 정답성을 확신할 수 없다면 **억지로 만들지
 - 마지막에 총 개수 / 성공 / 실패 요약, 가능하면 개별·전체 실행시간
 - 배열 출력은 `contentToString()` / `contentDeepToString()`
 - 배열 비교는 `contentEquals()` / `contentDeepEquals()` — primitive array에 `==`를 쓰지 않는다
+- **모든 케이스에 타임아웃을 건다** (아래 `callWithTimeout` 패턴). 사용자 풀이에 무한루프가 있을 수 있고, 실제로 자주 있었다 — 타임아웃 없이 돌리면 러너 자체가 멈춘다.
+- **타임아웃(무한루프 의심) 하나라도 나면 자동 반례 탐색(완전열거/랜덤)을 건너뛴다.** JVM 스레드는 안전하게 강제종료할 수 없어서 타임아웃 난 스레드는 daemon 좀비로 계속 돌며 할당을 반복한다 — 이미 하나 있는 상태에서 20초짜리 탐색을 추가로 돌리면 좀비가 더 쌓여 **Gradle 데몬 힙을 압박해 데몬이 죽는 사고**로 이어질 수 있다 (실제로 겪은 사고).
+- **`main()` 맨 끝에 `exitProcess(0)`을 반드시 넣는다.** 우리 보고가 끝나는 즉시 JVM을 종료시켜 좀비 스레드를 확실히 정리하고, 콘솔이 그 뒤로도 스팸으로 도배되는 것을 막는다.
 
 러너 뼈대:
 
 ```kotlin
 package pg.level1.p00000_example
 
+import kotlin.system.exitProcess
+
 private var passed = 0
 private var failed = 0
+private var anyTimedOut = false
+
+private fun <T> callWithTimeout(timeoutMs: Long, block: () -> T): Result<T>? {
+    var outcome: Result<T>? = null
+    val worker = Thread { outcome = runCatching(block) }
+    worker.isDaemon = true
+    worker.start()
+    worker.join(timeoutMs)
+    return if (worker.isAlive) null else outcome
+}
 
 private fun <T> check(
     name: String,
     priority: String,
     input: String,
     expected: T,
+    timeoutMs: Long = 3_000,
     eq: (T, T) -> Boolean = { a, b -> a == b },
     run: () -> T,
 ) {
     val start = System.nanoTime()
-    try {
-        val actual = run()
-        val elapsedMs = (System.nanoTime() - start) / 1_000_000
-        val ok = eq(expected, actual)
-        if (ok) passed++ else failed++
-        println("[${if (ok) "PASS" else "FAIL"}] $priority $name (${elapsedMs}ms)")
-        if (!ok) {
-            println("    input   : $input")
-            println("    expected: $expected")
-            println("    actual  : $actual")
-        }
-    } catch (e: Throwable) {
+    val outcome = callWithTimeout(timeoutMs, run)
+    val elapsedMs = (System.nanoTime() - start) / 1_000_000
+
+    if (outcome == null) {
         failed++
-        println("[FAIL] $priority $name — 예외 발생: $e")
+        anyTimedOut = true
+        println("[FAIL] $priority $name — ${timeoutMs}ms 안에 끝나지 않음 (무한 루프 의심)")
         println("    input   : $input")
+        return
     }
+    outcome.fold(
+        onSuccess = { actual ->
+            val ok = eq(expected, actual)
+            if (ok) passed++ else failed++
+            println("[${if (ok) "PASS" else "FAIL"}] $priority $name (${elapsedMs}ms)")
+            if (!ok) {
+                println("    input   : $input")
+                println("    expected: $expected")
+                println("    actual  : $actual")
+            }
+        },
+        onFailure = { e ->
+            failed++
+            println("[FAIL] $priority $name — 예외 발생: $e")
+            println("    input   : $input")
+        },
+    )
 }
 
 fun main() {
@@ -227,6 +256,15 @@ fun main() {
 
     println("---")
     println("total=${passed + failed} passed=$passed failed=$failed")
+
+    println("---")
+    if (anyTimedOut) {
+        println("자동 반례 탐색 생략: 이미 타임아웃된 케이스가 있음 (무한루프로 의심됨, 먼저 그것부터 고칠 것)")
+    } else {
+        // exhaustiveDiff() / randomDiff() 등 oracle 기반 탐색은 여기서 호출한다 (8단계 참고)
+    }
+
+    exitProcess(0)
 }
 ```
 

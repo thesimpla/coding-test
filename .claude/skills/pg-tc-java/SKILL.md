@@ -158,6 +158,8 @@ brute-force 자체의 정답성을 확신할 수 없다면 **억지로 만들지
 
 입력 공간이 작으면(불리언 조합, 길이 1~8 배열, 작은 문자 집합, 작은 그래프·순열) **랜덤보다 완전열거가 강력하다.** 그 경우 완전열거를 우선 제안한다.
 
+**중요**: 완전열거/랜덤 탐색 전체를 11단계의 타임아웃 헬퍼로 감싸서 부른다 (개별 호출이 아니라 전체를 한 번에). 그리고 7단계에서 이미 타임아웃(무한루프 의심)이 하나라도 났다면 **이 단계 자체를 건너뛴다** — 무한루프가 있는 채로 수천 회 반복 탐색을 돌리면 좀비 스레드가 쌓여 메모리를 압박한다. 실제로 이 순서를 안 지켜서 Gradle 데몬이 힙 부족으로 죽은 적이 있다.
+
 ### 9단계 — 상태 오염 / 입력 mutation 검증
 
 - 각 테스트는 **독립된 입력 객체**를 쓴다 (재사용 금지).
@@ -186,6 +188,9 @@ brute-force 자체의 정답성을 확신할 수 없다면 **억지로 만들지
 - 마지막에 총 개수 / 성공 / 실패 요약, 가능하면 개별·전체 실행시간
 - 배열 출력은 `Arrays.toString()` / `Arrays.deepToString()`
 - 배열 비교는 `Arrays.equals()` / `Arrays.deepEquals()` — 배열에 `==`를 쓰지 않는다
+- **모든 케이스에 타임아웃을 건다** (아래 `ExecutorService` + `Future.get(timeout)` 패턴). 사용자 풀이에 무한루프가 있을 수 있고, 실제로 자주 있었다 — 타임아웃 없이 돌리면 러너 자체가 멈춘다.
+- **타임아웃(무한루프 의심) 하나라도 나면 자동 반례 탐색(완전열거/랜덤)을 건너뛴다.** JVM 스레드는 안전하게 강제종료할 수 없어서 타임아웃 난 스레드는 daemon 좀비로 계속 돌며 할당을 반복한다 — 이미 하나 있는 상태에서 수천 회 탐색을 추가로 돌리면 좀비가 더 쌓여 **Gradle 데몬 힙을 압박해 데몬이 죽는 사고**로 이어질 수 있다 (실제로 겪은 사고).
+- **`main()` 맨 끝에 `System.exit(0)`을 반드시 넣는다.** 보고가 끝나는 즉시 JVM을 종료시켜 좀비 스레드를 확실히 정리하고, 콘솔이 그 뒤로도 스팸으로 도배되는 것을 막는다.
 
 러너 뼈대:
 
@@ -193,18 +198,32 @@ brute-force 자체의 정답성을 확신할 수 없다면 **억지로 만들지
 package pg.level1.p00000_example;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public class SolutionTest {
     private static int passed = 0;
     private static int failed = 0;
+    private static boolean anyTimedOut = false;
+    // 데몬 스레드 풀 — 타임아웃 난 작업은 JVM 종료 시(System.exit) 함께 정리된다.
+    private static final ExecutorService POOL = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
 
     private static <T> void check(String name, String priority, String input,
-                                  T expected, Supplier<T> run, BiPredicate<T, T> eq) {
+                                  T expected, long timeoutMs, Supplier<T> run, BiPredicate<T, T> eq) {
         long start = System.nanoTime();
+        Future<T> future = POOL.submit(run::get);
         try {
-            T actual = run.get();
+            T actual = future.get(timeoutMs, TimeUnit.MILLISECONDS);
             long elapsedMs = (System.nanoTime() - start) / 1_000_000;
             boolean ok = eq.test(expected, actual);
             if (ok) {
@@ -219,7 +238,13 @@ public class SolutionTest {
                 System.out.println("    expected: " + expected);
                 System.out.println("    actual  : " + actual);
             }
-        } catch (Throwable e) {
+        } catch (TimeoutException e) {
+            failed++;
+            anyTimedOut = true;
+            System.out.println("[FAIL] " + priority + " " + name
+                    + " — " + timeoutMs + "ms 안에 끝나지 않음 (무한 루프 의심)");
+            System.out.println("    input   : " + input);
+        } catch (Exception e) {
             failed++;
             System.out.println("[FAIL] " + priority + " " + name + " — 예외 발생: " + e);
             System.out.println("    input   : " + input);
@@ -228,7 +253,19 @@ public class SolutionTest {
 
     private static <T> void check(String name, String priority, String input,
                                   T expected, Supplier<T> run) {
-        check(name, priority, input, expected, run, Object::equals);
+        check(name, priority, input, expected, 3_000, run, Object::equals);
+    }
+
+    /** 완전열거/랜덤 등 오래 걸릴 수 있는 탐색을 통째로 타임아웃과 함께 실행한다. */
+    private static void runSearch(String label, long timeoutMs, Callable<String> search) {
+        Future<String> future = POOL.submit(search);
+        try {
+            System.out.println(future.get(timeoutMs, TimeUnit.MILLISECONDS));
+        } catch (TimeoutException e) {
+            System.out.println(label + ": " + timeoutMs + "ms 안에 끝나지 않음 (무한 루프 의심)");
+        } catch (Exception e) {
+            System.out.println(label + " 실행 중 예외: " + e);
+        }
     }
 
     public static void main(String[] args) {
@@ -237,6 +274,15 @@ public class SolutionTest {
 
         System.out.println("---");
         System.out.println("total=" + (passed + failed) + " passed=" + passed + " failed=" + failed);
+
+        System.out.println("---");
+        if (anyTimedOut) {
+            System.out.println("자동 반례 탐색 생략: 이미 타임아웃된 케이스가 있음 (무한루프로 의심됨, 먼저 그것부터 고칠 것)");
+        } else {
+            // runSearch("완전열거", 20_000, () -> exhaustiveDiff()); 등 8단계 탐색은 여기서 호출한다
+        }
+
+        System.exit(0);
     }
 }
 ```
