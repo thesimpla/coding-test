@@ -47,9 +47,10 @@ detekt {
 }
 
 // SolutionTest는 입출력 예를 그대로 박아둔 로컬 확인용 파일이라 매직넘버 등이 잔뜩 잡힌다.
-// 린트 대상은 실제 제출하는 Solution 코드로 한정한다.
+// Reference*는 다른 사람 풀이를 공부 목적으로 그대로 옮겨둔 것이라 이 저장소의 네이밍/스타일
+// 컨벤션을 따르지 않을 수 있다. 린트 대상은 실제 제출하는 Solution 코드로 한정한다.
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    exclude("**/SolutionTest.kt")
+    exclude("**/SolutionTest.kt", "**/Reference*.kt")
 }
 
 // 특정 문제의 main()을 터미널에서 실행한다.

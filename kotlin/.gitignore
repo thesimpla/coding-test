@@ -9,3 +9,8 @@ out/
 
 ### Mac OS ###
 .DS_Store
+
+### 개인 참고용 (커밋 안 함) ###
+# 다른 사람 풀이를 공부용으로 저장해두는 파일. Reference*.kt로 이름 지으면
+# git에도 안 잡히고, detekt 린트에서도 빠진다 (build.gradle.kts의 exclude 참고).
+**/Reference*.kt
