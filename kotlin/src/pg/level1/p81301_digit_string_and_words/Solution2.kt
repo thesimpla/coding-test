@@ -14,11 +14,10 @@ class Solution2 {
         for (i in s.indices) {
             if (s[i].isLetter()) { // in 'a' ~ 'z'
                 tmpString.add(s[i])
-                if(map.keys.contains(tmpString.joinToString(""))) {
+                if (map.keys.contains(tmpString.joinToString(""))) {
                     val value = tmpString.joinToString("")
                     arr.add(map[value]!!)
                     tmpString.clear()
-
                 }
             } else if (s[i].isDigit()) { // in number
                 arr.add(s[i])
