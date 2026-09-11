@@ -35,6 +35,9 @@ spotless {
                 "ktlint_standard_value-argument-comment" to "disabled",
                 "ktlint_standard_value-parameter-comment" to "disabled",
                 "ktlint_standard_discouraged-comment-location" to "disabled",
+                // 와일드카드 import도 ktlint가 자동으로 풀어줄 수 없어서 빌드를 죽인다.
+                // detekt의 WildcardImport 룰이 같은 내용을 깔끔하게 리포트하므로 그쪽에 맡긴다.
+                "ktlint_standard_no-wildcard-imports" to "disabled",
             )
         )
     }
